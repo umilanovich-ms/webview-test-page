@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebView PostMessage Test Page</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 24px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 16px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
+        }
+
+        button.close-webview {
+            background: #48bb78;
+        }
+
+        button.close-webview:hover {
+            background: #38a169;
+        }
+
+        button.close-page {
+            background: #ed8936;
+        }
+
+        button.close-page:hover {
+            background: #dd6b20;
+        }
+
+        button.crash {
+            background: #f56565;
+        }
+
+        button.crash:hover {
+            background: #e53e3e;
+        }
+
+        .status {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 24px;
+        }
+
+        .status-label {
+            color: #718096;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .status-message {
+            color: #2d3748;
+            font-size: 14px;
+            font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+            word-break: break-all;
+        }
+
+        .status-message.empty {
+            color: #a0aec0;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>WebView Test Page</h1>
+        <p class="subtitle">Test postMessage communication</p>
+
+        <div class="button-group">
+            <button id="testAction" onclick="sendMessage('test_action')">
+                Test Action
+            </button>
+            <button id="closeWebView" class="close-webview" onclick="sendMessage('close_webview')">
+                Close WebView
+            </button>
+            <button id="sendData" onclick="sendMessage('send_data')">
+                Send Data
+            </button>
+            <button id="closePage" class="close-page" onclick="closePage()">
+                Close Page
+            </button>
+            <button id="crashPage" class="crash" onclick="crashPage()">
+                Crash Page
+            </button>
+        </div>
+
+        <div class="status">
+            <div class="status-label">Last Message Sent</div>
+            <div id="statusMessage" class="status-message empty">No messages sent yet</div>
+        </div>
+    </div>
+
+    <script>
+        function sendMessage(message) {
+            try {
+                // Send postMessage to parent WebView
+                window.parent.postMessage(message, '*');
+
+                // Update status display
+                updateStatus('Sent: ' + message);
+
+                // Log to console for debugging
+                console.log('[WebView Test] Sent message:', message);
+            } catch (error) {
+                console.error('[WebView Test] Error sending message:', error);
+                updateStatus('Error: ' + error.message);
+            }
+        }
+
+        function closePage() {
+            try {
+                updateStatus('Attempting to close page...');
+                console.log('[WebView Test] Attempting to close page');
+
+                // Attempt to close the current window
+                window.close();
+
+                // If window.close() doesn't work, log it
+                setTimeout(() => {
+                    console.warn('[WebView Test] window.close() may not have worked (browser security restriction)');
+                }, 100);
+            } catch (error) {
+                console.error('[WebView Test] Error closing page:', error);
+                updateStatus('Error closing: ' + error.message);
+            }
+        }
+
+        function crashPage() {
+            try {
+                updateStatus('Crashing page...');
+                console.log('[WebView Test] Intentionally crashing page');
+
+                // Throw uncaught error to crash the page
+                throw new Error('Intentional crash for WebView testing');
+            } catch (error) {
+                // This catch block won't execute for uncaught errors
+                // but included for completeness
+                console.error('[WebView Test] Error:', error);
+                throw error; // Re-throw to ensure it's uncaught
+            }
+        }
+
+        function updateStatus(message) {
+            const statusElement = document.getElementById('statusMessage');
+            if (statusElement) {
+                statusElement.textContent = message;
+                statusElement.classList.remove('empty');
+            }
+        }
+
+        // Log when page loads
+        console.log('[WebView Test] Page loaded and ready');
+
+        // Listen for any messages from parent (if bidirectional communication is needed later)
+        window.addEventListener('message', function(event) {
+            console.log('[WebView Test] Received message from parent:', event.data, 'from origin:', event.origin);
+        });
+
+        // Log errors for debugging
+        window.addEventListener('error', function(event) {
+            console.error('[WebView Test] JavaScript error:', event.error);
+        });
+    </script>
+</body>
+</html>
