@@ -164,7 +164,7 @@
         function sendMessage(message) {
             try {
                 // Send postMessage to parent WebView
-                window.parent.postMessage(message, '*');
+                postMessage(message, '*');
 
                 // Update status display
                 updateStatus('Sent: ' + message);
