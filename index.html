@@ -13,7 +13,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #b2b6c4 0%, #af78e7 100%);
+            background: linear-gradient(135deg, #b2b6c4 0%, #78e7c8 100%);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -161,10 +161,23 @@
     </div>
 
     <script>
+
+        function sendMessageToDefold(message) {
+            if (message !== null) {
+                if (typeof defold !== 'undefined' && defold.postMessage) {
+                    defold.postMessage(message);
+                } else if (typeof webkit !== 'undefined' && webkit.messageHandlers && webkit.messageHandlers.defoldBridge) {
+                    webkit.messageHandlers.defoldBridge.postMessage(message);
+                }
+            }
+        }
+
         function sendMessage(message) {
             try {
                 // Send postMessage to parent WebView
                 postMessage(message, '*');
+
+                sendMessageToDefold(message);
 
                 // Update status display
                 updateStatus('Sent: ' + message);
