@@ -138,13 +138,10 @@
 
         <div class="button-group">
             <button id="testAction" onclick="sendMessage('test_action')">
-                Test Action
+                Send Test Event
             </button>
             <button id="closeWebView" class="close-webview" onclick="sendMessage('close_webview')">
-                Close WebView
-            </button>
-            <button id="sendData" onclick="sendMessage('send_data')">
-                Send Data
+                Send Close Event
             </button>
             <button id="closePage" class="close-page" onclick="closePage()">
                 Close Page
@@ -209,18 +206,20 @@
         }
 
         function crashPage() {
-            try {
-                updateStatus('Crashing page...');
-                console.log('[WebView Test] Intentionally crashing page');
+            // try {
+            //     updateStatus('Crashing page...');
+            //     console.log('[WebView Test] Intentionally crashing page');
 
-                // Throw uncaught error to crash the page
-                throw new Error('Intentional crash for WebView testing');
-            } catch (error) {
-                // This catch block won't execute for uncaught errors
-                // but included for completeness
-                console.error('[WebView Test] Error:', error);
-                throw error; // Re-throw to ensure it's uncaught
-            }
+            //     // Throw uncaught error to crash the page
+            //     throw new Error('Intentional crash for WebView testing');
+            // } catch (error) {
+            //     // This catch block won't execute for uncaught errors
+            //     // but included for completeness
+            //     console.error('[WebView Test] Error:', error);
+            //     throw error; // Re-throw to ensure it's uncaught
+            // }
+
+            throw new Error('Intentional crash for WebView testing');
         }
 
         function updateStatus(message) {
